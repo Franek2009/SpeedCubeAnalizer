@@ -6,6 +6,8 @@ const path = require('node:path');
 
 const fixturePath = path.join(__dirname, '..', 'test_data_150_solves.csv');
 const fixtureBytes = fs.readFileSync(fixturePath);
+const header = 'Category;Time (MM:SS.SSS);Scrambler;Date;Penalty +2 (yes or no);DNF (yes or no);Section';
+const csvFile = (name, body) => ({ name, mimeType: 'text/csv', buffer: Buffer.from(`${header}\n${body}`) });
 
 test('import is persisted and only promises a backup when one exists', async ({ page }) => {
   await page.goto('/');
@@ -65,4 +67,52 @@ test('data-relative presets and full CSV download match the imported file', asyn
   ]);
   expect(download.suggestedFilename()).toBe('test_data_150_solves.csv');
   expect(fs.readFileSync(await download.path()).equals(fixtureBytes)).toBe(true);
+});
+
+test('restoring swaps the active dataset and its backup', async ({ page }) => {
+  const first = csvFile('pierwszy.csv', '3x3x3;00:10.000;;2026-01-01 12:00;no;no;A');
+  const second = csvFile('drugi.csv', '2x2x2;00:05.000;;2026-02-01 12:00;no;no;B');
+  await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+
+  await page.locator('#fileInput').setInputFiles(first);
+  await page.locator('#fileInput').setInputFiles(second);
+  await expect(page.locator('#datasetName')).toContainText('drugi.csv');
+  await expect(page.locator('#restoreButton')).toBeEnabled();
+
+  page.once('dialog', dialog => dialog.accept());
+  await page.locator('#restoreButton').click();
+  await expect(page.locator('#datasetName')).toContainText('pierwszy.csv');
+  await expect(page.locator('#success')).toContainText('Przywrócono i zapisano „pierwszy.csv”');
+  const stored = await page.evaluate(() => ({
+    active: JSON.parse(localStorage.getItem('cubestats.active.v1')).name,
+    backup: JSON.parse(localStorage.getItem('cubestats.backup.v1')).name
+  }));
+  expect(stored).toEqual({ active: 'pierwszy.csv', backup: 'drugi.csv' });
+});
+
+test('invalid CSV preserves current data while a partial CSV imports valid rows', async ({ page }) => {
+  const valid = csvFile('poprawny.csv', '3x3x3;00:10.000;;2026-01-01 12:00;no;no;A');
+  const partial = csvFile('czesciowy.csv', [
+    '3x3x3;00:11.000;;2026-01-02 12:00;no;no;B',
+    '3x3x3;zly-czas;;2026-01-02 12:01;no;no;B'
+  ].join('\n'));
+  await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.locator('#fileInput').setInputFiles(valid);
+
+  await page.locator('#fileInput').setInputFiles({ name: 'bledny.csv', mimeType: 'text/csv', buffer: Buffer.from('Category;Date\n3x3x3;2026-01-01') });
+  await expect(page.locator('#error')).toContainText('Brak wymaganych kolumn');
+  await expect(page.locator('#datasetName')).toContainText('poprawny.csv');
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('cubestats.active.v1')).name)).toBe('poprawny.csv');
+  expect(await page.evaluate(() => localStorage.getItem('cubestats.backup.v1'))).toBeNull();
+
+  await page.locator('#fileInput').setInputFiles(partial);
+  await expect(page.locator('#warning')).toContainText('Zaimportowano 1 prób, odrzucono 1');
+  await expect(page.locator('#datasetName')).toContainText('czesciowy.csv · 1 ułożeń');
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('cubestats.active.v1')));
+  expect(stored.name).toBe('czesciowy.csv');
+  expect(stored.count).toBe(1);
 });

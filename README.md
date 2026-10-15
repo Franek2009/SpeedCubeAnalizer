@@ -12,15 +12,17 @@ Po otwarciu strony:
 2. W SpeedCubeAnalyzer wybierz **Importuj CSV** i wskaż zapisany plik albo przeciągnij go na stronę.
 3. Statystyki zostaną przeliczone automatycznie.
 
-Przycisk **Pełne dane CSV** pobiera dokładną kopię aktywnego importu. **Eksport podsumowania** tworzy przeliczone zestawienie dla wybranej kategorii i zakresu dat.
+Przycisk **Pełne dane CSV** pobiera dokładną kopię aktywnego importu. **Eksport podsumowania** tworzy przeliczone zestawienie wszystkich kategorii z wybranego zakresu dat, niezależnie od kategorii widocznej aktualnie w interfejsie.
 
 ## Prywatność danych
 
 - Zawartość CSV jest odczytywana i analizowana przez kod działający w przeglądarce. Aplikacja nie wysyła jej na serwer.
-- Ostatni import oraz jedna kopia zapasowa są przechowywane w `localStorage` przeglądarki, osobno dla adresu Live Demo.
+- Ostatni import oraz jedna kopia zapasowa są przechowywane w `localStorage` przeglądarki. Na Live Demo pamięć ta należy do całego originu `https://franek2009.github.io`; ścieżka `/SpeedCubeAnalyzer/` nie izoluje jej technicznie od innych projektów działających na tej samej domenie.
 - Wyczyszczenie danych witryny usuwa lokalną kopię. Warto okresowo pobierać **Pełne dane CSV**.
 - SpeedCubeAnalyzer nie zawiera kont użytkowników, reklam, narzędzi analitycznych ani zewnętrznych skryptów.
 - Live Demo jest udostępniane przez GitHub Pages. GitHub może przetwarzać dane techniczne związane z wejściem na stronę, takie jak adres IP, zgodnie ze swoją [polityką prywatności](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+
+Nie stwierdzono, aby inny projekt na tej domenie odczytywał dane SpeedCubeAnalyzer. Osobna domena może zostać użyta w przyszłości, jeśli potrzebna będzie pełna izolacja pamięci przeglądarki.
 
 ## Obsługiwane źródło danych
 
