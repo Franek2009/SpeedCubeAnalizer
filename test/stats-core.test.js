@@ -12,17 +12,23 @@ function solve(value, options = {}) {
   };
 }
 
-test('representative export preserves categories, DNF and +2', () => {
+test('CSV import flows through penalties, DNF, chronology and Ao5', () => {
   const csv = `Category;Time (MM:SS.SSS);Scrambler;Date;Penalty +2 (yes or no);DNF (yes or no);Section
-3x3x3;00:10.000;;2026-01-01 12:00;no;no;1
-3x3x3;00:11.000;;2026-01-01 12:01;yes;no;1
-2x2x2;00:08.000;;2026-01-01 12:02;no;yes;1`;
+3x3x3;00:30.000;;2026-01-01 12:04;no;no;1
+3x3x3;00:11.000;;2026-01-01 12:03;yes;no;1
+3x3x3;00:08.000;;2026-01-01 12:02;no;yes;1
+3x3x3;00:20.000;;2026-01-01 12:01;no;no;1
+3x3x3;00:10.000;;2026-01-01 12:00;no;no;1`;
   const { solves, diagnostics } = core.parseCsv(csv);
   const summary = core.summarize(solves);
-  assert.equal(solves.length, 3);
-  assert.equal(new Set(solves.map(item => item.category)).size, 2);
+  assert.equal(solves.length, 5);
+  assert.deepEqual(solves.map(item => item.finalSeconds), [10, 20, null, 13, 30]);
+  assert.equal(solves[3].rawSeconds, 11);
+  assert.equal(solves[3].plus, true);
+  assert.equal(solves[2].dnf, true);
   assert.equal(summary.dnf, 1);
   assert.equal(summary.plus, 1);
+  assert.equal(core.currentAverage(solves, 5).value, 21);
   assert.equal(diagnostics.rejected, 0);
 });
 
@@ -53,9 +59,46 @@ test('best average scans consecutive attempts', () => {
   assert.equal(core.bestAverage(values, 5).value, 12);
 });
 
+test('average trimming uses five percent rounded up', () => {
+  assert.equal(core.trimCountForSize(5), 1);
+  assert.equal(core.trimCountForSize(12), 1);
+  assert.equal(core.trimCountForSize(50), 3);
+  assert.equal(core.trimCountForSize(100), 5);
+  for (const size of [5, 12, 50, 100]) {
+    const values = Array.from({ length: size }, (_, index) => solve(index + 1));
+    assert.equal(core.currentAverage(values, size).value, (size + 1) / 2);
+  }
+});
+
+test('large averages tolerate only as many DNFs as the trim count', () => {
+  for (const size of [5, 12, 50, 100]) {
+    const allowed = core.trimCountForSize(size);
+    const valid = Array.from({ length: size }, (_, index) => solve(index + 1, { dnf: index >= size - allowed }));
+    const invalid = Array.from({ length: size }, (_, index) => solve(index + 1, { dnf: index >= size - allowed - 1 }));
+    assert.equal(core.currentAverage(valid, size).status, 'ok', `Ao${size} should allow ${allowed} DNF`);
+    assert.equal(core.currentAverage(invalid, size).status, 'dnf', `Ao${size} should reject ${allowed + 1} DNF`);
+  }
+});
+
 test('rolling completed average always uses exactly completed solves', () => {
   const values = [solve(10), solve(20), solve(1, { dnf: true }), solve(30), solve(40)];
   assert.deepEqual(core.rollingCompletedAverage(values, 3), [null, null, null, 20, 30]);
+});
+
+test('consistency reports the actual sample and caps it at the target', () => {
+  const partial = core.consistency([solve(10), solve(20), solve(1, { dnf: true })], 50);
+  assert.deepEqual(partial, { value: 5, sampleSize: 2, targetSize: 50, complete: false });
+  const exact = core.consistency(Array.from({ length: 50 }, () => solve(20)), 50);
+  assert.deepEqual(exact, { value: 0, sampleSize: 50, targetSize: 50, complete: true });
+  const capped = core.consistency([...Array.from({ length: 10 }, () => solve(5)), ...Array.from({ length: 50 }, () => solve(20))], 50);
+  assert.deepEqual(capped, { value: 0, sampleSize: 50, targetSize: 50, complete: true });
+});
+
+test('CSV chronology preserves timer order when timestamps share a minute', () => {
+  const csv = `Category;Time (MM:SS.SSS);Date;Penalty +2 (yes or no);DNF (yes or no);Section
+3x3x3;00:12.000;2026-01-01 12:00;no;no;1
+3x3x3;00:11.000;2026-01-01 12:00;no;no;1`;
+  assert.deepEqual(core.parseCsv(csv).solves.map(item => item.finalSeconds), [11, 12]);
 });
 
 test('parser reports bad rows and keeps valid rows', () => {

@@ -110,7 +110,7 @@
   }
 
   function renderMetrics(solves) {
-    const stats = C.summarize(solves), completed = C.completedTimes(solves);
+    const stats = C.summarize(solves), completed = C.completedTimes(solves), regularity = C.consistency(solves, 50);
     $('metrics').innerHTML = metric('Mediana', formatTime(stats.median)) +
       metric('Ostatnie 20', formatTime(C.average(completed.slice(-20))), `${Math.min(20, completed.length)} ukończonych`) +
       metric('Ostatnie 50', formatTime(C.average(completed.slice(-50))), `${Math.min(50, completed.length)} ukończonych`) +
@@ -118,7 +118,7 @@
       metric('Aktualne Ao5', formatAverage(C.currentAverage(solves, 5))) + metric('Najlepsze Ao5', formatAverage(C.bestAverage(solves, 5))) +
       metric('Aktualne Ao12', formatAverage(C.currentAverage(solves, 12))) + metric('Najlepsze Ao12', formatAverage(C.bestAverage(solves, 12))) +
       metric('Najlepsze Ao50', formatAverage(C.bestAverage(solves, 50))) + metric('Najlepsze Ao100', formatAverage(C.bestAverage(solves, 100))) +
-      metric('Regularność 50', formatTime(C.consistency(solves, 50)), 'Odchylenie standardowe') + metric('Ukończone', `${stats.completed}/${stats.attempts}`);
+      metric(`Regularność ${regularity.sampleSize}`, formatTime(regularity.value), `Ostatnie ${regularity.sampleSize}/${regularity.targetSize}; mniej = stabilniej`) + metric('Ukończone', `${stats.completed}/${stats.attempts}`);
   }
 
   function renderProgress(solves) {
@@ -195,15 +195,28 @@
     bins.forEach((count, index) => { const gap = 3, x = padding.left + index * plotWidth / 12 + gap / 2, barHeight = plotHeight * count / peak; context.fillStyle = palette.purple; context.fillRect(x, padding.top + plotHeight - barHeight, plotWidth / 12 - gap, barHeight); }); context.fillStyle = palette.muted; context.font = '11px system-ui'; context.textAlign = 'left'; context.fillText(axisLabel(minimum), padding.left, height - 6); context.textAlign = 'right'; context.fillText(axisLabel(maximum), width - padding.right, height - 6);
   }
 
+  function downloadText(text, filename) {
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' })), link = document.createElement('a');
+    link.href = url; link.download = filename; link.click(); setTimeout(() => URL.revokeObjectURL(url), 500);
+  }
+
   function exportSummary() {
     const rows = [['Kategoria', 'Ułożenia', 'Ukończone', 'Średnia [s]', 'Mediana [s]', 'Rekord [s]', 'Kary +2', 'DNF']];
     [...new Set(allSolves.map(solve => solve.category))].forEach(category => { const stats = C.summarize(allFilteredSolves().filter(solve => solve.category === category)); rows.push([category, stats.attempts, stats.completed, stats.mean?.toFixed(3) || '', stats.median?.toFixed(3) || '', stats.best?.toFixed(3) || '', stats.plus, stats.dnf]); });
-    const text = '\uFEFF' + rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(';')).join('\r\n'), url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' })), link = document.createElement('a'); link.href = url; link.download = 'cube_stats_podsumowanie.csv'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 500);
+    const text = '\uFEFF' + rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+    downloadText(text, 'cube_stats_podsumowanie.csv');
+  }
+
+  function exportFullData() {
+    const originalName = String(activeMeta.name || '').replace(/[\\/:*?"<>|\0]/g, '_');
+    const filename = activeMeta.demo ? 'cubestats_dane_demo.csv' : originalName.toLowerCase().endsWith('.csv') ? originalName : 'cubestats_dane.csv';
+    downloadText(activeMeta.csv, filename);
   }
 
   $('importButton').addEventListener('click', () => $('fileInput').click());
   $('fileInput').addEventListener('change', async event => { const file = event.target.files[0]; if (file) loadDataset({ csv: await file.text(), name: file.name }, { persist: true }); event.target.value = ''; });
   $('restoreButton').addEventListener('click', () => { const backup = getStored(STORE_BACKUP); if (!backup || !confirm(`Przywrócić „${backup.name}” i zachować obecny zbiór jako kopię?`)) return; const current = getStored(STORE_ACTIVE); if (current) setStored(STORE_BACKUP, current); setStored(STORE_ACTIVE, backup); loadDataset(backup); showNotice('success', `Przywrócono „${backup.name}”.`); });
+  $('exportDataButton').addEventListener('click', exportFullData);
   $('exportButton').addEventListener('click', exportSummary);
   $('category').addEventListener('change', event => { currentCategory = event.target.value; historyLimit = 50; render(); });
   $('datePreset').addEventListener('change', event => { updatePreset(event.target.value); historyLimit = 50; render(); });

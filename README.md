@@ -26,6 +26,8 @@ PORT=4174 npm start
 
 Po otwarciu strony wybierz **Importuj CSV** albo przeciągnij plik na stronę. Dane są czytane przez przeglądarkę i nie są wysyłane do serwera. Ostatni import oraz jedna kopia zapasowa pozostają w pamięci lokalnej przeglądarki. Serwer zatrzymasz skrótem `Ctrl+C`.
 
+Przycisk **Pełne dane CSV** pobiera dokładną kopię aktywnego importu, niezależnie od wybranej kategorii i zakresu dat. **Eksport podsumowania** tworzy natomiast przeliczone zestawienie statystyk dla aktualnego zakresu. Pełny eksport pozwala odtworzyć dane po wyczyszczeniu pamięci przeglądarki.
+
 Nadal można również otworzyć `cube_stats.html` bezpośrednio, bez uruchamiania serwera.
 
 ## Testy
@@ -36,7 +38,14 @@ Wymagany jest Node.js 18 lub nowszy.
 npm test
 ```
 
-Testy obejmują parser CSV, kary +2, DNF, chronologię, Ao5/Ao12, historię rekordów i średnią z dokładnie 20 ukończonych prób. Korzystają wyłącznie z anonimowych danych testowych; prywatne eksporty `cube_timer_csv_*.csv` są ignorowane przez Git.
+Testy obejmują pełną ścieżkę importu CSV, kary +2, DNF, chronologię, Ao5/Ao12/Ao50/Ao100, historię rekordów, regularność i średnią z dokładnie 20 ukończonych prób. Korzystają wyłącznie z anonimowych danych testowych; prywatne eksporty `cube_timer_csv_*.csv` są ignorowane przez Git. GitHub Actions uruchamia ten sam zestaw testów dla Node.js 20 i 22 po każdym pushu i w pull requestach do `main`.
+
+## Konwencje statystyczne
+
+- Ao5, Ao12, Ao50 i Ao100 odrzucają po 5% najlepszych i najgorszych prób, zaokrąglając liczbę odrzuceń w górę. Oznacza to odpowiednio 1, 1, 3 i 5 prób z każdej strony.
+- DNF jest wynikiem najgorszym. Średnia może odrzucić tyle DNF, ile wynosi liczba odrzucanych najgorszych prób; kolejny DNF unieważnia średnią.
+- Tylko Ao5 jest oficjalnym formatem WCA. Większe Ao są konwencją analityczną CubeStats.
+- „Regularność N” to odchylenie standardowe ostatnich `N` ukończonych prób, maksymalnie 50. Niższa wartość oznacza bardziej stabilne czasy.
 
 ## Pliki
 

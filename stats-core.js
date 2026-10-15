@@ -147,11 +147,18 @@
     };
   }
 
+  function trimCountForSize(size) {
+    return size > 0 ? Math.ceil(size * 0.05) : 0;
+  }
+
   function averageWindow(window) {
+    const trimCount = trimCountForSize(window.length);
     const dnfs = window.filter(solve => solve.dnf || solve.finalSeconds === null).length;
-    if (dnfs > 1) return { status: 'dnf', value: null };
+    if (dnfs > trimCount) return { status: 'dnf', value: null };
     const values = completedTimes(window).sort((a, b) => a - b);
-    const kept = dnfs === 1 ? values.slice(1) : values.slice(1, -1);
+    const slowestNumbersToTrim = trimCount - dnfs;
+    const end = slowestNumbersToTrim ? values.length - slowestNumbersToTrim : values.length;
+    const kept = values.slice(trimCount, end);
     return { status: 'ok', value: average(kept) };
   }
 
@@ -179,7 +186,8 @@
   }
 
   function consistency(solves, size = 50) {
-    return standardDeviation(completedTimes(solves).slice(-size));
+    const values = completedTimes(solves).slice(-size);
+    return { value: standardDeviation(values), sampleSize: values.length, targetSize: size, complete: values.length >= size };
   }
 
   function filterByDate(solves, from, to) {
@@ -242,6 +250,7 @@
   return {
     aggregateByPeriod, average, averageWindow, bestAverage, compareHalves, completedTimes,
     consistency, currentAverage, durationToSeconds, filterByDate, median, parseCsv,
-    recordHistory, rollingCompletedAverage, sortSolves, standardDeviation, summarize
+    recordHistory, rollingCompletedAverage, sortSolves, standardDeviation, summarize,
+    trimCountForSize
   };
 });
