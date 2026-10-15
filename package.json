@@ -4,7 +4,7 @@
   "private": true,
   "description": "Lokalny analizator czasów układania kostki Rubika",
   "scripts": {
+    "start": "node server.js",
     "test": "node --test"
   }
 }
-
