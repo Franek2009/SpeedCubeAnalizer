@@ -32,13 +32,28 @@ Nadal można również otworzyć `cube_stats.html` bezpośrednio, bez uruchamian
 
 ## Testy
 
-Wymagany jest Node.js 18 lub nowszy.
+Wymagany jest wspierany Node.js 22 lub nowszy. Po sklonowaniu repozytorium zainstaluj zależności:
+
+```sh
+npm ci
+```
+
+Szybkie testy rdzenia i serwera:
 
 ```sh
 npm test
 ```
 
-Testy obejmują pełną ścieżkę importu CSV, kary +2, DNF, chronologię, Ao5/Ao12/Ao50/Ao100, historię rekordów, regularność i średnią z dokładnie 20 ukończonych prób. Korzystają wyłącznie z anonimowych danych testowych; prywatne eksporty `cube_timer_csv_*.csv` są ignorowane przez Git. GitHub Actions uruchamia ten sam zestaw testów dla Node.js 20 i 22 po każdym pushu i w pull requestach do `main`.
+Testy interfejsu w prawdziwym Chromium:
+
+```sh
+npx playwright install chromium
+npm run test:ui
+```
+
+Oba zestawy można uruchomić przez `npm run test:all`. Testy obejmują pełną ścieżkę importu CSV, kary +2, DNF, chronologię, Ao5/Ao12/Ao50/Ao100, historię rekordów, regularność, zapis lokalny, presety dat i pobieranie pełnej kopii CSV. Korzystają wyłącznie z anonimowych danych testowych; prywatne eksporty `cube_timer_csv_*.csv` są ignorowane przez Git. GitHub Actions uruchamia testy jednostkowe dla Node.js 22 i 24 oraz testy UI w Chromium po każdym pushu i w pull requestach do `main`.
+
+Presety **Ostatnie 30 dni danych** i **Miesiąc ostatniego ułożenia** są liczone względem najnowszej próby w aktywnym eksporcie, nie względem daty systemowej. Dzięki temu działają również dla archiwalnych zestawów.
 
 ## Konwencje statystyczne
 

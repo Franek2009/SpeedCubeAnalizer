@@ -48,6 +48,19 @@
     catch (_) { return false; }
   }
 
+  function showImportOutcome(parsed, storage) {
+    const prefix = parsed.diagnostics.rejected
+      ? `Zaimportowano ${parsed.diagnostics.accepted} prób, odrzucono ${parsed.diagnostics.rejected}. ${parsed.diagnostics.errors.slice(0, 3).map(error => `Wiersz ${error.line}: ${error.reasons.join(', ')}`).join('; ')}.`
+      : `Zaimportowano ${parsed.diagnostics.accepted} prób.`;
+    let persistence = '';
+    if (!storage.activeSaved) persistence = ' Dane są dostępne tylko w bieżącej karcie i znikną po jej zamknięciu lub odświeżeniu.';
+    else if (storage.hadPrevious && !storage.backupSaved) persistence = ' Nowe dane zapisano lokalnie, ale nie udało się zachować poprzedniego zbioru jako kopii.';
+    else if (storage.hadPrevious) persistence = ' Dane zapisano lokalnie; poprzedni zbiór można przywrócić.';
+    else persistence = ' Dane zapisano lokalnie.';
+    const isWarning = parsed.diagnostics.rejected > 0 || !storage.activeSaved || !storage.backupSaved;
+    showNotice(isWarning ? 'warning' : 'success', prefix + persistence);
+  }
+
   function loadDataset(payload, options = {}) {
     clearNotices();
     try {
@@ -60,13 +73,9 @@
       historyLimit = 50;
       if (options.persist) {
         const old = getStored(STORE_ACTIVE);
-        if (old) setStored(STORE_BACKUP, old);
-        if (!setStored(STORE_ACTIVE, activeMeta)) showNotice('warning', 'Dane są dostępne w tej karcie, ale przeglądarka nie pozwoliła ich zapisać.');
-      }
-      if (parsed.diagnostics.rejected) {
-        const examples = parsed.diagnostics.errors.slice(0, 3).map(error => `wiersz ${error.line}: ${error.reasons.join(', ')}`).join('; ');
-        showNotice('warning', `Zaimportowano ${parsed.diagnostics.accepted} prób, odrzucono ${parsed.diagnostics.rejected}. ${examples}`);
-      } else if (options.persist) showNotice('success', `Zaimportowano ${parsed.diagnostics.accepted} prób. Poprzedni zbiór można przywrócić.`);
+        const storage = { hadPrevious: Boolean(old), backupSaved: old ? setStored(STORE_BACKUP, old) : true, activeSaved: setStored(STORE_ACTIVE, activeMeta) };
+        showImportOutcome(parsed, storage);
+      } else if (parsed.diagnostics.rejected) showNotice('warning', `Wczytano ${parsed.diagnostics.accepted} prób, odrzucono ${parsed.diagnostics.rejected}.`);
       render();
     } catch (error) { showNotice('error', error.message || 'Nie udało się odczytać pliku.'); }
   }
@@ -215,7 +224,15 @@
 
   $('importButton').addEventListener('click', () => $('fileInput').click());
   $('fileInput').addEventListener('change', async event => { const file = event.target.files[0]; if (file) loadDataset({ csv: await file.text(), name: file.name }, { persist: true }); event.target.value = ''; });
-  $('restoreButton').addEventListener('click', () => { const backup = getStored(STORE_BACKUP); if (!backup || !confirm(`Przywrócić „${backup.name}” i zachować obecny zbiór jako kopię?`)) return; const current = getStored(STORE_ACTIVE); if (current) setStored(STORE_BACKUP, current); setStored(STORE_ACTIVE, backup); loadDataset(backup); showNotice('success', `Przywrócono „${backup.name}”.`); });
+  $('restoreButton').addEventListener('click', () => {
+    const backup = getStored(STORE_BACKUP);
+    if (!backup || !confirm(`Przywrócić „${backup.name}” i zachować obecny zbiór jako kopię?`)) return;
+    const current = getStored(STORE_ACTIVE), activeSaved = setStored(STORE_ACTIVE, backup), backupSaved = activeSaved && current ? setStored(STORE_BACKUP, current) : !current;
+    loadDataset(backup);
+    if (!activeSaved) showNotice('warning', `Przywrócono „${backup.name}” tylko w bieżącej karcie; nie udało się zapisać tej zmiany lokalnie.`);
+    else if (!backupSaved) showNotice('warning', `Przywrócono i zapisano „${backup.name}”, ale nie udało się zachować zastępowanego zbioru jako kopii.`);
+    else showNotice('success', `Przywrócono i zapisano „${backup.name}”. Zastąpiony zbiór można ponownie przywrócić.`);
+  });
   $('exportDataButton').addEventListener('click', exportFullData);
   $('exportButton').addEventListener('click', exportSummary);
   $('category').addEventListener('change', event => { currentCategory = event.target.value; historyLimit = 50; render(); });

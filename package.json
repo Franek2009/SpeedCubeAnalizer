@@ -5,6 +5,14 @@
   "description": "Lokalny analizator czasów układania kostki Rubika",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "test:ui": "playwright test",
+    "test:all": "npm test && npm run test:ui"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
   }
 }

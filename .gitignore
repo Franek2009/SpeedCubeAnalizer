@@ -2,3 +2,5 @@ node_modules/
 .DS_Store
 coverage/
 cube_timer_csv_*.csv
+playwright-report/
+test-results/
