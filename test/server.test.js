@@ -29,7 +29,7 @@ test('serves only the application allowlist with security headers', async () => 
   assert.equal(page.headers['x-content-type-options'], 'nosniff');
   assert.equal(page.headers['x-frame-options'], 'DENY');
   assert.equal(page.headers['cache-control'], 'no-store');
-  assert.equal((await request(server, '/cube_timer_csv_2026_10_15_14_26_51.csv')).status, 404);
+  assert.equal((await request(server, '/cube_timer_csv_private.csv')).status, 404);
   assert.equal((await request(server, '/README.md')).status, 404);
   assert.equal((await request(server, '/../package.json')).status, 404);
 });
