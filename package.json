@@ -1,0 +1,10 @@
+{
+  "name": "cubestats",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lokalny analizator czasów układania kostki Rubika",
+  "scripts": {
+    "test": "node --test"
+  }
+}
+
