@@ -24,7 +24,7 @@ test.after(async () => { await new Promise(resolve => server.close(resolve)); })
 test('serves only the application allowlist with security headers', async () => {
   const page = await request(server, '/');
   assert.equal(page.status, 200);
-  assert.match(page.body, /CubeStats/);
+  assert.match(page.body, /SpeedCubeAnalyzer/);
   assert.match(page.headers['content-security-policy'], /default-src 'none'/);
   assert.equal(page.headers['x-content-type-options'], 'nosniff');
   assert.equal(page.headers['x-frame-options'], 'DENY');

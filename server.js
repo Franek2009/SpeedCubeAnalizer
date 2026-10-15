@@ -80,7 +80,7 @@ function start() {
   });
   server.listen(port, HOST, () => {
     const address = server.address();
-    console.log(`CubeStats działa pod adresem http://${HOST}:${address.port}`);
+    console.log(`SpeedCubeAnalyzer działa pod adresem http://${HOST}:${address.port}`);
     console.log('Serwer nasłuchuje wyłącznie lokalnie. Zatrzymaj go skrótem Ctrl+C.');
   });
   return server;

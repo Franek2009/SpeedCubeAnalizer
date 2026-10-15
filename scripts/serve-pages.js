@@ -23,4 +23,4 @@ http.createServer((request, response) => {
   const content = fs.readFileSync(path.join(root, asset[0]));
   response.writeHead(200, { ...SECURITY_HEADERS, 'Content-Type': asset[1], 'Content-Length': content.length });
   response.end(request.method === 'HEAD' ? '' : content);
-}).listen(4173, '127.0.0.1', () => console.log('Artefakt Pages działa pod adresem http://127.0.0.1:4173'));
+}).listen(4173, '127.0.0.1', () => console.log('Artefakt SpeedCubeAnalyzer Pages działa pod adresem http://127.0.0.1:4173'));

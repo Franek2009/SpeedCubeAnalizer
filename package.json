@@ -1,8 +1,9 @@
 {
-  "name": "cubestats",
+  "name": "speedcubeanalyzer",
   "version": "1.0.0",
   "private": true,
-  "description": "Lokalny analizator czasów układania kostki Rubika",
+  "description": "Analizator czasów układania kostki Rubika działający lokalnie w przeglądarce",
+  "license": "MIT",
   "scripts": {
     "build:pages": "node scripts/build-pages.js",
     "start": "node server.js",
