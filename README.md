@@ -2,6 +2,12 @@
 
 Prosty, lokalny analizator eksportów CSV z timera kostki Rubika. Pokazuje aktualne tempo, postęp, rekordy i regularność bez wysyłania danych do sieci.
 
+## Źródło danych
+
+CubeStats analizuje pliki `.csv` eksportowane z aplikacji [Cube Timer](https://play.google.com/store/apps/details?id=br.com.mateusfiereck.cubetimer) autorstwa Mateusa Fierecka. Informacja i link służą wyłącznie wskazaniu obsługiwanego źródła danych.
+
+CubeStats jest niezależnym, nieoficjalnym projektem. Nie jest powiązany z autorem Cube Timer ani przez niego sponsorowany lub zatwierdzony. Autor CubeStats nie otrzymuje wynagrodzenia ani innych korzyści za zamieszczenie tego odnośnika; link nie jest afiliacyjny.
+
 ## Bezpieczne uruchomienie z terminala
 
 W katalogu projektu uruchom:
