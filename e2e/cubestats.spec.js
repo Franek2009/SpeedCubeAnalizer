@@ -12,7 +12,12 @@ test('import is persisted and only promises a backup when one exists', async ({ 
   await page.evaluate(() => localStorage.clear());
   await page.reload();
 
+  await expect(page.locator('#onboarding')).toBeVisible();
+  await expect(page.locator('#onboarding')).toContainText('W aplikacji Cube Timer');
+  await expect(page.locator('#onboardingImport')).toHaveText('Wybierz plik CSV');
+
   await page.locator('#fileInput').setInputFiles(fixturePath);
+  await expect(page.locator('#onboarding')).toBeHidden();
   await expect(page.locator('#datasetName')).toContainText('test_data_150_solves.csv · 150 ułożeń');
   await expect(page.locator('#kpis .value').first()).toHaveText('70');
   await expect(page.locator('#success')).toContainText('Dane zapisano lokalnie.');

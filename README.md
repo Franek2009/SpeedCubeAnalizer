@@ -6,7 +6,13 @@ Prosty analizator eksportów CSV z timera kostki Rubika. Pokazuje aktualne tempo
 
 **[Uruchom SpeedCubeAnalyzer w przeglądarce](https://franek2009.github.io/SpeedCubeAnalyzer/)** — bez instalowania, klonowania repozytorium i wpisywania komend.
 
-Po otwarciu strony wybierz **Importuj CSV** albo przeciągnij plik na stronę. Przycisk **Pełne dane CSV** pobiera dokładną kopię aktywnego importu. **Eksport podsumowania** tworzy przeliczone zestawienie dla wybranej kategorii i zakresu dat.
+Po otwarciu strony:
+
+1. W aplikacji Cube Timer użyj funkcji eksportu danych i zapisz pełną historię jako plik `.csv`.
+2. W SpeedCubeAnalyzer wybierz **Importuj CSV** i wskaż zapisany plik albo przeciągnij go na stronę.
+3. Statystyki zostaną przeliczone automatycznie.
+
+Przycisk **Pełne dane CSV** pobiera dokładną kopię aktywnego importu. **Eksport podsumowania** tworzy przeliczone zestawienie dla wybranej kategorii i zakresu dat.
 
 ## Prywatność danych
 

@@ -103,6 +103,7 @@
     $('category').innerHTML = categories.map(category => `<option ${category === currentCategory ? 'selected' : ''}>${escapeHtml(category)}</option>`).join('');
     $('datasetName').textContent = `${activeMeta.name} · ${allSolves.length} ułożeń · ${categories.length} kategorie`;
     $('importMeta').textContent = activeMeta.demo ? 'Dane demonstracyjne — zaimportuj własny CSV' : `Ostatni import: ${new Date(activeMeta.importedAt).toLocaleString('pl-PL')} · ${diagnostics.accepted} przyjętych${diagnostics.rejected ? ` · ${diagnostics.rejected} odrzuconych` : ''}`;
+    $('onboarding').hidden = !activeMeta.demo;
     $('restoreButton').disabled = !getStored(STORE_BACKUP);
     const values = selectedCategorySolves();
     renderKpis(values); renderMetrics(values); renderProgress(values); renderSessions(values); renderCategories(); renderRecords(values); renderHistory(values); renderCharts(values);
@@ -223,6 +224,7 @@
   }
 
   $('importButton').addEventListener('click', () => $('fileInput').click());
+  $('onboardingImport').addEventListener('click', () => $('fileInput').click());
   $('fileInput').addEventListener('change', async event => { const file = event.target.files[0]; if (file) loadDataset({ csv: await file.text(), name: file.name }, { persist: true }); event.target.value = ''; });
   $('restoreButton').addEventListener('click', () => {
     const backup = getStored(STORE_BACKUP);
