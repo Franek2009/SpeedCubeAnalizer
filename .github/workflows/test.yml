@@ -40,7 +40,44 @@ jobs:
           package-manager-cache: false
       - name: Install dependencies
         run: npm ci
+      - name: Prepare GitHub Pages artifact
+        run: npm run build:pages
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Run browser tests
+      - name: Run browser tests against Pages artifact
+        env:
+          CUBESTATS_PAGES_E2E: '1'
         run: npm run test:ui
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [unit, ui]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Use Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Prepare minimal Pages artifact
+        run: npm run build:pages
+      - name: Verify published file list
+        run: test "$(find pages-dist -maxdepth 1 -type f -printf '%f\n' | sort | tr '\n' ' ')" = "app.js index.html stats-core.js "
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: pages-dist
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

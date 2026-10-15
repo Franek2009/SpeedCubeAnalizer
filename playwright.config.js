@@ -12,7 +12,7 @@ module.exports = defineConfig({
     browserName: 'chromium'
   },
   webServer: {
-    command: 'node server.js',
+    command: process.env.CUBESTATS_PAGES_E2E === '1' ? 'node scripts/serve-pages.js' : 'node server.js',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 15_000

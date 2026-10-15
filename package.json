@@ -4,6 +4,7 @@
   "private": true,
   "description": "Lokalny analizator czasów układania kostki Rubika",
   "scripts": {
+    "build:pages": "node scripts/build-pages.js",
     "start": "node server.js",
     "test": "node --test",
     "test:ui": "playwright test",

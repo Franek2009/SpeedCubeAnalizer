@@ -2,15 +2,21 @@
 
 Prosty, lokalny analizator eksportów CSV z timera kostki Rubika. Pokazuje aktualne tempo, postęp, rekordy i regularność bez wysyłania danych do sieci.
 
+## Live Demo
+
+**[Uruchom CubeStats w przeglądarce](https://franek2009.github.io/SpeedCubeAnalyzer/)** — bez instalowania, klonowania repozytorium i wpisywania komend.
+
+Plik CSV jest analizowany lokalnie przez przeglądarkę i nie jest wysyłany na serwer. Ostatni import oraz jedna kopia zapasowa są przechowywane w `localStorage`, osobno dla adresu Live Demo. Wyczyszczenie danych witryny w przeglądarce usuwa tę lokalną kopię, dlatego warto okresowo używać przycisku **Pełne dane CSV**.
+
 ## Źródło danych
 
 CubeStats analizuje pliki `.csv` eksportowane z aplikacji [Cube Timer](https://play.google.com/store/apps/details?id=br.com.mateusfiereck.cubetimer) autorstwa Mateusa Fierecka. Informacja i link służą wyłącznie wskazaniu obsługiwanego źródła danych.
 
 CubeStats jest niezależnym, nieoficjalnym projektem. Nie jest powiązany z autorem Cube Timer ani przez niego sponsorowany lub zatwierdzony. Autor CubeStats nie otrzymuje wynagrodzenia ani innych korzyści za zamieszczenie tego odnośnika; link nie jest afiliacyjny.
 
-## Bezpieczne uruchomienie z terminala
+## Opcjonalne uruchomienie lokalne
 
-W katalogu projektu uruchom:
+Wariant lokalny jest przeznaczony głównie do pracy offline i rozwijania projektu. W katalogu projektu uruchom:
 
 ```sh
 npm start
@@ -68,4 +74,5 @@ Presety **Ostatnie 30 dni danych** i **Miesiąc ostatniego ułożenia** są licz
 - `app.js` — interakcje, wykresy i lokalny zapis importów;
 - `stats-core.js` — czysta, testowalna logika danych i statystyk;
 - `server.js` — ograniczony do localhost serwer plików aplikacji;
+- `scripts/build-pages.js` — przygotowanie minimalnego artefaktu Live Demo;
 - `test/stats-core.test.js` — automatyczne testy rdzenia.
