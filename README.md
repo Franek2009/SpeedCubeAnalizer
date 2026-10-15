@@ -105,6 +105,6 @@ SpeedCubeAnalyzer jest narzędziem treningowym, a nie oficjalnym systemem wynik�
 
 ## Autor i licencja
 
-Autor: [Franek2009](https://github.com/Franek2009)
+Autor: [Kontrabasista](https://github.com/Franek2009)
 
 Projekt jest udostępniany na licencji [MIT](LICENSE).
