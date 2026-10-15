@@ -30,7 +30,7 @@ Wymagany jest Node.js 18 lub nowszy.
 npm test
 ```
 
-Testy obejmują parser CSV, kary +2, DNF, chronologię, Ao5/Ao12, historię rekordów i średnią z dokładnie 20 ukończonych prób. Weryfikują także sumy kontrolne dołączonego eksportu.
+Testy obejmują parser CSV, kary +2, DNF, chronologię, Ao5/Ao12, historię rekordów i średnią z dokładnie 20 ukończonych prób. Korzystają wyłącznie z anonimowych danych testowych; prywatne eksporty `cube_timer_csv_*.csv` są ignorowane przez Git.
 
 ## Pliki
 

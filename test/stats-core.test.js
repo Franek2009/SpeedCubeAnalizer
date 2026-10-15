@@ -2,8 +2,6 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 const core = require('../stats-core.js');
 
 function solve(value, options = {}) {
@@ -14,14 +12,17 @@ function solve(value, options = {}) {
   };
 }
 
-test('real export has expected totals', () => {
-  const csv = fs.readFileSync(path.join(__dirname, '..', 'cube_timer_csv_2026_10_15_14_26_51.csv'), 'utf8');
+test('representative export preserves categories, DNF and +2', () => {
+  const csv = `Category;Time (MM:SS.SSS);Scrambler;Date;Penalty +2 (yes or no);DNF (yes or no);Section
+3x3x3;00:10.000;;2026-01-01 12:00;no;no;1
+3x3x3;00:11.000;;2026-01-01 12:01;yes;no;1
+2x2x2;00:08.000;;2026-01-01 12:02;no;yes;1`;
   const { solves, diagnostics } = core.parseCsv(csv);
   const summary = core.summarize(solves);
-  assert.equal(solves.length, 908);
-  assert.equal(new Set(solves.map(item => item.category)).size, 4);
-  assert.equal(summary.dnf, 27);
-  assert.equal(summary.plus, 31);
+  assert.equal(solves.length, 3);
+  assert.equal(new Set(solves.map(item => item.category)).size, 2);
+  assert.equal(summary.dnf, 1);
+  assert.equal(summary.plus, 1);
   assert.equal(diagnostics.rejected, 0);
 });
 
